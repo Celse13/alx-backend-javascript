@@ -1,6 +1,6 @@
 export default function getResponseFromAPI() {
     return new Promise((resolve, reject) => {
-      let statusCode;
+      let statusCode = 200;
       setTimeout(() => {
         if (statusCode === 200) {
           resolve('Success');
@@ -9,4 +9,4 @@ export default function getResponseFromAPI() {
         }
       }, 2000);
     });
-  }
+}
