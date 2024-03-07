@@ -3,10 +3,12 @@ import Car from './10-car.js';
 export default class EVCar extends Car {
   constructor(brand, motor, color, range) {
     super(brand, motor, color);
-    this._range = range;
+    this.range = range;
   }
 
-  get range() { return this._range; }
+  get range() {
+    return this._range;
+  }
 
   set range(newRange) {
     if (typeof newRange !== 'string') {
@@ -16,6 +18,7 @@ export default class EVCar extends Car {
   }
 
   cloneCar() {
-    return new Car();
+    const Species = this.constructor[Symbol.species] || Car;
+    return new Species();
   }
 }
