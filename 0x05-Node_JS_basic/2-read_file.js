@@ -1,26 +1,30 @@
 const fs = require('fs');
 
-function countStudents(path) {
-  let data;
+const countAndListStudentsByMajor = (filePath) => {
   try {
-    data = fs.readFileSync(path, 'utf8');
-  } catch (err) {
-    throw new Error('Cannot load the database');
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const lines = fileContent.split('\n');
+    const records = lines.map((line) => line.split(','));
+    const studentData = records.slice(1, -1);
+
+    const totalStudents = studentData.length;
+    const csStudentNames = [];
+    const sweStudentNames = [];
+
+    for (const student of studentData) {
+      if (student[3] === 'CS') {
+        csStudentNames.push(student[0]);
+      } else if (student[3] === 'SWE') {
+        sweStudentNames.push(student[0]);
+      }
+    }
+
+    console.log(`Total students: ${totalStudents}`);
+    console.log(`CS students: ${csStudentNames.length}. Names: ${csStudentNames.join(', ')}`);
+    console.log(`SWE students: ${sweStudentNames.length}. Names: ${sweStudentNames.join(', ')}`);
+  } catch (error) {
+    throw new Error('Failed to load the student data');
   }
+};
 
-  const lines = data.split('\n');
-  const students = lines.slice(1).filter(line => line).map(line => {
-    const [firstName, , field] = line.split(',');
-    return { firstName, field };
-  });
-
-  console.log(`Number of students: ${students.length}`);
-
-  const fields = [...new Set(students.map(student => student.field))];
-  fields.forEach(field => {
-    const studentsInField = students.filter(student => student.field === field);
-    console.log(`Number of students in ${field}: ${studentsInField.length}. List: ${studentsInField.map(student => student.firstName).join(', ')}`);
-  });
-}
-
-module.exports = countStudents;
+module.exports = countAndListStudentsByMajor;
