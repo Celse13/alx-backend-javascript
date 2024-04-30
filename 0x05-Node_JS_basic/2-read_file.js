@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const countAndListStudentsByMajor = (filePath) => {
+const countStudents = (filePath) => {
   try {
     const fileContent = fs.readFileSync(filePath, 'utf8');
     const lines = fileContent.split('\n');
@@ -27,4 +27,4 @@ const countAndListStudentsByMajor = (filePath) => {
   }
 };
 
-module.exports = countAndListStudentsByMajor;
+module.exports = countStudents;
