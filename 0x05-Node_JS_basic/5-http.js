@@ -1,51 +1,48 @@
-const httpMod = require('http');
-const fsMod = require('fs').promises;
+const httpLib = require('http');
+const fsLib = require('fs').promises;
 
-function countStudents(dbPath) {
-  return fsMod.readFile(dbPath, 'utf8')
-    .then(data => {
-      const records = data.trim().split('\n').slice(1); // Skip header and remove empty lines
-      const stats = records.reduce((acc, curr) => {
-        const [name, , , field] = curr.split(',');
-        acc.total++;
-        if (!acc[field]) acc[field] = { count: 0, names: [] };
-        acc[field].count++;
-        acc[field].names.push(name);
-        return acc;
-      }, { total: 0 });
-
-      let report = `Number of students: ${stats.total}\n`;
-      Object.keys(stats).forEach(key => {
-        if (key !== 'total') {
-          report += `Number of students in ${key}: ${stats[key].count}. List: ${stats[key].names.join(', ')}\n`;
-        }
-      });
-
-      return report;
-    })
-    .catch(err => {
-      throw new Error('Cannot load the database');
+async function countStudents(filePath) {
+  try {
+    const content = await fsLib.readFile(filePath, 'utf8');
+    const rows = content.trim().split('\n');
+    const studentInfo = {};
+    let totalStudents = 0;
+    let output = '';
+    rows.forEach((row, index) => {
+      if (row && index > 0) { // Skip header
+        const [name, , , dept] = row.split(',');
+        if (!studentInfo[dept]) studentInfo[dept] = [];
+        studentInfo[dept].push(name);
+        totalStudents++;
+      }
     });
+    output += `Number of students: ${totalStudents}\n`;
+    Object.entries(studentInfo).forEach(([dept, names]) => {
+      output += `Number of students in ${dept}: ${names.length}. List: ${names.join(', ')}\n`;
+    });
+    return output;
+  } catch (err) {
+    throw new Error('Cannot load the database');
+  }
 }
 
-const server = httpMod.createServer((req, res) => {
-  if (req.url === '/') {
-    res.writeHead(200);
-    res.end('Hello Holberton School!');
-  } else if (req.url === '/students') {
-    const dbFile = process.argv[2];
-    countStudents(dbFile)
+const server = httpLib.createServer((request, response) => {
+  if (request.url === '/') {
+    response.writeHead(200);
+    response.end('Hello Holberton School!');
+  } else if (request.url === '/students') {
+    countStudents(process.argv[2])
       .then(report => {
-        res.writeHead(200);
-        res.end(`This is the list of our students\n${report}`);
+        response.writeHead(200);
+        response.end(`This is the list of our students\n${report}`);
       })
       .catch(error => {
-        res.writeHead(500);
-        res.end(error.message);
+        response.writeHead(404);
+        response.end(`This is the list of our students\n${error.message}`);
       });
   } else {
-    res.writeHead(404);
-    res.end('Not found');
+    response.writeHead(404);
+    response.end('Not found');
   }
 });
 
