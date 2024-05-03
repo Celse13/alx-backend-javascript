@@ -3,9 +3,9 @@ const fs = require('fs');
 const countStudents = async (p) => {
   try {
     const d = await fs.promises.readFile(p, 'utf8');
-    const r = d.split('\n');
+    const r = d.split('\n').filter(line => line.trim() !== '');
     const c = r.map(row => row.split(','));
-    const dt = c.slice(1, -1);
+    const dt = c.slice(1);
 
     const n = dt.length;
     const cs = [];
