@@ -1,29 +1,27 @@
 const fs = require('fs');
 
-const countStudents = (path) => {
+const countStudents = (p) => {
   try {
-    const csvData = fs.readFileSync(path, 'utf8');
-    const rows = csvData.split('\n');
-    const cols = rows.map((row) => row.split(','));
-    const data = cols.slice(1, -1);
+    const d = fs.readFileSync(p, 'utf8');
+    const r = d.split('\n');
+    const c = r.map((row) => row.split(','));
+    const dt = c.slice(1, -1);
 
-    const numberOfStudents = data.length;
-    const csStudentsName = [];
-    const sweStudentsName = [];
+    const n = dt.length;
+    const cs = [];
+    const swe = [];
 
-    for (const row of data) {
+    for (const row of dt) {
       if (row[3] === 'CS') {
-        csStudentsName.push(row[0]);
+        cs.push(row[0]);
       } else if (row[3] === 'SWE') {
-        sweStudentsName.push(row[0]);
+        swe.push(row[0]);
       }
     }
-    console.log(`Number of students: ${numberOfStudents}`);
-    console.log(`Number of students in CS: ${csStudentsName.length}. List: ${csStudentsName.join(', ')}`);
-    console.log(`Number of students in SWE: ${sweStudentsName.length}. List: ${sweStudentsName.join(', ')}`);
+    console.log(`Number of students: ${n}`);
+    console.log(`Number of students in CS: ${cs.length}. List: ${cs.join(', ')}`);
+    console.log(`Number of students in SWE: ${swe.length}. List: ${swe.join(', ')}`);
   } catch (err) {
     throw new Error('Cannot load the database');
   }
 };
-
-module.exports = countStudents;
