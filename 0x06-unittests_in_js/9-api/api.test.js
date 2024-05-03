@@ -15,7 +15,8 @@ describe('Index page', function() {
       done();
     });
   });
-  
+});
+
   describe('Cart page', function() {
     it('returns status code 200 when :id is a number', function(done) {
       request('http://localhost:7865/cart/12', function(error, response, body) {
