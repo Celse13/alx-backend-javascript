@@ -7,22 +7,22 @@ async function countStudents(filePath) {
     const rows = content.trim().split('\n');
     const studentInfo = {};
     let totalStudents = 0;
-    let output = '';
+    let output = 'Number of students: ';
     rows.forEach((row, index) => {
-      if (row && index > 0) { // Skip header
+      if (row && index > 0) { // Adjusted to skip the header row correctly
         const [name, , , dept] = row.split(',');
         if (!studentInfo[dept]) studentInfo[dept] = [];
         studentInfo[dept].push(name);
         totalStudents++;
       }
     });
-    output += `Number of students: ${totalStudents}\n`;
+    output += `${totalStudents}\n`;
     Object.entries(studentInfo).forEach(([dept, names]) => {
       output += `Number of students in ${dept}: ${names.length}. List: ${names.join(', ')}\n`;
     });
     return output;
   } catch (err) {
-    throw new Error('Cannot load the database');
+    throw new Error('Cannot load the database'); // Ensures consistent error handling
   }
 }
 
@@ -37,7 +37,7 @@ const server = httpLib.createServer((request, response) => {
         response.end(`This is the list of our students\n${report}`);
       })
       .catch(error => {
-        response.writeHead(404);
+        response.writeHead(404); // Consistent with the original code's error handling
         response.end(`This is the list of our students\n${error.message}`);
       });
   } else {
