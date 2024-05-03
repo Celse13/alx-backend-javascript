@@ -1,44 +1,55 @@
-const httpLib = require('http');
-const fsLib = require('fs').promises;
+const http = require('http');
+const fs = require('fs').promises;
 
-async function countStudents(filePath) {
-  try {
-    const content = await fsLib.readFile(filePath, 'utf8');
-    const rows = content.trim().split('\n');
-    const studentInfo = {};
-    let totalStudents = 0;
-    let output = 'Number of students: ';
-    rows.forEach((row, index) => {
-      if (row && index > 0) { // Adjusted to skip the header row correctly
-        const [name, , , dept] = row.split(',');
-        if (!studentInfo[dept]) studentInfo[dept] = [];
-        studentInfo[dept].push(name);
-        totalStudents++;
-      }
-    });
-    output += `${totalStudents}\n`;
-    Object.entries(studentInfo).forEach(([dept, names]) => {
-      output += `Number of students in ${dept}: ${names.length}. List: ${names.join(', ')}\n`;
-    });
-    return output;
-  } catch (err) {
-    throw new Error('Cannot load the database'); // Ensures consistent error handling
-  }
+function countStudents(filePath) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filePath, 'utf8')
+      .then(fileContent => {
+        const lines = fileContent.trim().split('\n');
+        const studentInfo = {};
+        let studentCount = -1;
+        let output = '';
+
+        lines.forEach(line => {
+          if (line.length > 0) {
+            const data = line.split(',');
+            const major = data[3];
+            const name = data[0];
+
+            if (studentCount >= 0) {
+              studentInfo[major] = studentInfo[major] || [];
+              studentInfo[major].push(name);
+            }
+            studentCount++;
+          }
+        });
+
+        output += `Number of students: ${studentCount}\n`;
+        Object.keys(studentInfo).forEach(key => {
+          output += `Number of students in ${key}: ${studentInfo[key].length}. List: ${studentInfo[key].join(', ')}\n`;
+        });
+
+        resolve(output);
+      })
+      .catch(error => {
+        reject(new Error('Cannot load the database'));
+      });
+  });
 }
 
-const server = httpLib.createServer((request, response) => {
+const server = http.createServer((request, response) => {
   if (request.url === '/') {
     response.writeHead(200);
     response.end('Hello Holberton School!');
   } else if (request.url === '/students') {
     countStudents(process.argv[2])
-      .then(report => {
+      .then(info => {
         response.writeHead(200);
-        response.end(`This is the list of our students\n${report}`);
+        response.end(`This is the list of our students\n${info}`);
       })
-      .catch(error => {
-        response.writeHead(404); // Consistent with the original code's error handling
-        response.end(`This is the list of our students\n${error.message}`);
+      .catch(err => {
+        response.writeHead(404);
+        response.end(`This is the list of our students\n${err.message}`);
       });
   } else {
     response.writeHead(404);
