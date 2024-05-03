@@ -7,25 +7,21 @@ function countStudents(filePath) {
       .then(fileContent => {
         const lines = fileContent.trim().split('\n');
         const studentInfo = {};
-        let studentCount = -1;
-        let output = '';
+        let studentCount = 0; // start counting from 0, adjust later
 
-        lines.forEach(line => {
-          if (line.length > 0) {
+        lines.forEach((line, index) => {
+          if (index !== 0 && line.length > 0) {
             const data = line.split(',');
             const major = data[3];
             const name = data[0];
-
-            if (studentCount >= 0) {
-              studentInfo[major] = studentInfo[major] || [];
-              studentInfo[major].push(name);
-            }
-            studentCount++;
+            studentInfo[major] = studentInfo[major] || [];
+            studentInfo[major].push(name);
           }
         });
 
-        output += `Number of students: ${studentCount}\n`;
-        Object.keys(studentInfo).forEach(key => {
+        studentCount = lines.length - 1; // adjust count for header
+        let output = `Number of students: ${studentCount}\n`;
+        Object.keys(studentInfo).sort().forEach(key => {
           output += `Number of students in ${key}: ${studentInfo[key].length}. List: ${studentInfo[key].join(', ')}\n`;
         });
 
@@ -44,7 +40,7 @@ const server = http.createServer((request, response) => {
   } else if (request.url === '/students') {
     countStudents(process.argv[2])
       .then(info => {
-        response.writeHead(200);
+        response.writeHead(200, { 'Content-Type': 'text/plain' });
         response.end(`This is the list of our students\n${info}`);
       })
       .catch(err => {
