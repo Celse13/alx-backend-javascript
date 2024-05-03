@@ -2,23 +2,23 @@ const http = require('http');
 
 const countStudents = require('./3-read_file_async');
 
-const file = process.argv[2];
+const databasePath = process.argv[2];
 
-const app = http.createServer(async (req, res) => {
-  if (req.url === '/') {
+const app = http.createServer(async (request, response) => {
+  if (request.url === '/') {
     res.write('Hello Holberton School!');
-    return res.end();
-  }
-  if (req.url === '/students') {
-    res.write('This is the list of our students\n');
+    response.end();
+  } else if (request.url === '/students') {
+    respose.write('This is the list of our students\n');
     try {
-      const students = await countStudents(file);
-      return res.end(`${students.join('\n')}`);
-    } catch (err) {
-      res.end(err.message);
+      const studentInfo = await countStudents(databasePath);
+      response.end(`${studentInfo.join('\n')}`);
+    } catch (error) {
+      response.end(error.message);
     }
+  } else {
+    response.end();
   }
-  return res.end();
 });
 
 app.listen(1245);
