@@ -1,30 +1,38 @@
 const fs = require('fs');
 
-const countStudents = (filePath) => {
+function countStudents(path) {
   try {
-    const fileContent = fs.readFileSync(filePath, 'utf8');
-    const lines = fileContent.split('\n');
-    const records = lines.map((line) => line.split(','));
-    const studentData = records.slice(1, -1);
+    // Attempt to read the file synchronously
+    const data = fs.readFileSync(path, { encoding: 'utf8' });
 
-    const totalStudents = studentData.length;
-    const csStudentNames = [];
-    const sweStudentNames = [];
+    // Split the file content by new line and filter out any empty lines
+    const lines = data.split('\n').filter(Boolean);
 
-    for (const student of studentData) {
-      if (student[3] === 'CS') {
-        csStudentNames.push(student[0]);
-      } else if (student[3] === 'SWE') {
-        sweStudentNames.push(student[0]);
+    // Skip the header row and initialize an object to count students by field
+    const studentsByField = {};
+
+    for (let i = 1; i < lines.length; i++) {
+      const [firstName, , field] = lines[i].split(',');
+
+      if (!studentsByField[field]) {
+        studentsByField[field] = [];
       }
+
+      studentsByField[field].push(firstName);
     }
 
-    console.log(`Total students: ${totalStudents}`);
-    console.log(`CS students: ${csStudentNames.length}. Names: ${csStudentNames.join(', ')}`);
-    console.log(`SWE students: ${sweStudentNames.length}. Names: ${sweStudentNames.join(', ')}`);
+    // Total number of students
+    console.log(`Number of students: ${lines.length - 1}`);
+
+    // Log the number of students and their names by field
+    Object.entries(studentsByField).forEach(([field, names]) => {
+      console.log(`Number of students in ${field}: ${names.length}. List: ${names.join(', ')}`);
+    });
+
   } catch (error) {
-    throw new Error('Failed to load the student data');
+    // If the file cannot be read, throw an error
+    throw new Error('Cannot load the database');
   }
-};
+}
 
 module.exports = countStudents;
